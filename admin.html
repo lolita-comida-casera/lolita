@@ -8,65 +8,109 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <style> body { font-family: 'Plus Jakarta Sans', sans-serif; } .no-scrollbar::-webkit-scrollbar { display: none; } </style>
 </head>
-<body class="bg-stone-100 min-h-screen pb-20">
+<body class="bg-stone-100 min-h-screen pb-20 relative">
 
-  <div class="max-w-2xl mx-auto p-4">
-    <div class="text-center my-6">
-      <h1 class="text-3xl font-bold text-stone-800">Panel Lolita</h1>
-      <p class="text-stone-500">Gestión de menú y carruseles</p>
-    </div>
-
-    <div class="flex bg-white rounded-xl shadow-sm mb-6 p-1 overflow-x-auto no-scrollbar">
-      <button onclick="cambiarTab('nuevo')" id="tab-nuevo" class="flex-1 min-w-[120px] py-2.5 rounded-lg bg-amber-100 text-amber-700 font-bold transition">NUEVO</button>
-      <button onclick="cambiarTab('editar')" id="tab-editar" class="flex-1 min-w-[120px] py-2.5 rounded-lg text-stone-500 font-bold hover:bg-stone-50 transition">PRODUCTOS</button>
-      <button onclick="cambiarTab('rubros')" id="tab-rubros" class="flex-1 min-w-[120px] py-2.5 rounded-lg text-stone-500 font-bold hover:bg-stone-50 transition">RUBROS</button>
-    </div>
-
-    <div id="seccion-nuevo" class="bg-white rounded-3xl shadow-md p-6">
-      <form id="form-producto" class="space-y-4">
-        <div><label class="block text-sm font-semibold text-stone-700 mb-1">Nombre</label><input type="text" id="nombre" required class="w-full p-3 rounded-xl border bg-stone-50 outline-none"></div>
-        <div class="grid grid-cols-2 gap-4">
-          <div><label class="block text-sm font-semibold text-stone-700 mb-1">Precio ($)</label><input type="number" id="precio" required class="w-full p-3 rounded-xl border bg-stone-50 outline-none"></div>
-          <div><label class="block text-sm font-semibold text-stone-700 mb-1">% Descuento</label><input type="number" id="descuento" value="0" class="w-full p-3 rounded-xl border bg-stone-50 outline-none"></div>
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-stone-700 mb-1">Rubro</label>
-          <select id="rubro-select" required class="w-full p-3 rounded-xl border bg-stone-50 outline-none"><option value="">Cargando...</option></select>
-        </div>
-        <div><label class="block text-sm font-semibold text-stone-700 mb-1">Descripción</label><textarea id="descripcion" rows="2" class="w-full p-3 rounded-xl border bg-stone-50 outline-none"></textarea></div>
-        <div>
-          <label class="block text-sm font-semibold text-stone-700 mb-1">Fotos (Podés seleccionar varias)</label>
-          <input type="file" id="fotos" accept="image/*" multiple required class="w-full p-2 border rounded-xl bg-stone-50 text-sm">
-        </div>
-        <button type="submit" id="btn-submit" class="w-full bg-amber-600 text-white font-bold py-3.5 rounded-xl shadow-md">Publicar Producto</button>
-      </form>
-    </div>
-
-    <div id="seccion-editar" class="hidden space-y-4"><div id="lista-editar" class="space-y-4"></div></div>
-
-    <div id="seccion-rubros" class="hidden bg-white rounded-3xl shadow-md p-6">
-      <form id="form-rubro" class="flex gap-2 mb-8">
-        <input type="text" id="nuevo-rubro-nombre" required placeholder="Nuevo rubro..." class="flex-1 p-3 rounded-xl border bg-stone-50 outline-none">
-        <button type="submit" id="btn-add-rubro" class="bg-emerald-500 text-white font-bold px-6 rounded-xl">Crear</button>
-      </form>
-      <div id="lista-rubros" class="space-y-3"></div>
+  <div id="pantalla-login" class="fixed inset-0 bg-stone-100 flex items-center justify-center z-[100] px-4">
+    <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center border border-stone-200">
+      <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+      </div>
+      <h2 class="text-2xl font-bold text-stone-800 mb-1">Acceso Restringido</h2>
+      <p class="text-stone-500 text-sm mb-6">Ingresá tu clave para gestionar el menú.</p>
+      
+      <input type="password" id="input-pass" placeholder="Contraseña..." class="w-full p-3 rounded-xl border border-stone-200 bg-stone-50 mb-4 focus:ring-2 focus:ring-amber-500 outline-none text-center font-bold tracking-widest">
+      
+      <button onclick="verificarLogin()" class="w-full bg-stone-800 text-white font-bold py-3.5 rounded-xl hover:bg-black transition-colors active:scale-95 shadow-md">
+        Desbloquear Panel
+      </button>
+      <p id="error-login" class="text-red-500 text-sm mt-4 font-semibold hidden animate-bounce">Contraseña incorrecta</p>
     </div>
   </div>
 
-  <script>
+  <div id="contenido-admin" class="hidden">
+    <div class="max-w-2xl mx-auto p-4">
+      <div class="text-center my-6">
+        <h1 class="text-3xl font-bold text-stone-800">Panel Lolita</h1>
+        <p class="text-stone-500">Gestión total de productos y rubros</p>
+      </div>
+
+      <div class="flex bg-white rounded-xl shadow-sm mb-6 p-1 overflow-x-auto no-scrollbar">
+        <button onclick="cambiarTab('nuevo')" id="tab-nuevo" class="flex-1 min-w-[120px] py-2.5 rounded-lg bg-amber-100 text-amber-700 font-bold transition">NUEVO</button>
+        <button onclick="cambiarTab('editar')" id="tab-editar" class="flex-1 min-w-[120px] py-2.5 rounded-lg text-stone-500 font-bold hover:bg-stone-50 transition">PRODUCTOS</button>
+        <button onclick="cambiarTab('rubros')" id="tab-rubros" class="flex-1 min-w-[120px] py-2.5 rounded-lg text-stone-500 font-bold hover:bg-stone-50 transition">RUBROS</button>
+      </div>
+
+      <div id="seccion-nuevo" class="bg-white rounded-3xl shadow-md p-6">
+        <form id="form-producto" class="space-y-4">
+          <div><label class="block text-sm font-semibold text-stone-700 mb-1">Nombre del producto</label><input type="text" id="nombre" required class="w-full p-3 rounded-xl border bg-stone-50 outline-none"></div>
+          <div class="grid grid-cols-2 gap-4">
+            <div><label class="block text-sm font-semibold text-stone-700 mb-1">Precio ($)</label><input type="number" id="precio" required class="w-full p-3 rounded-xl border bg-stone-50 outline-none"></div>
+            <div><label class="block text-sm font-semibold text-stone-700 mb-1">% Descuento</label><input type="number" id="descuento" value="0" class="w-full p-3 rounded-xl border bg-stone-50 outline-none"></div>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-stone-700 mb-1">Rubro</label>
+            <select id="rubro-select" required class="w-full p-3 rounded-xl border bg-stone-50 outline-none"><option value="">Cargando...</option></select>
+          </div>
+          <div><label class="block text-sm font-semibold text-stone-700 mb-1">Descripción</label><textarea id="descripcion" rows="2" class="w-full p-3 rounded-xl border bg-stone-50 outline-none"></textarea></div>
+          <div>
+            <label class="block text-sm font-semibold text-stone-700 mb-1">Fotos (Podés seleccionar varias)</label>
+            <input type="file" id="fotos" accept="image/*" multiple required class="w-full p-2 border rounded-xl bg-stone-50 text-sm">
+          </div>
+          <button type="submit" id="btn-submit" class="w-full bg-amber-600 text-white font-bold py-3.5 rounded-xl shadow-md">Publicar Producto</button>
+        </form>
+      </div>
+
+      <div id="seccion-editar" class="hidden space-y-4"><div id="lista-editar" class="space-y-4"></div></div>
+
+      <div id="seccion-rubros" class="hidden bg-white rounded-3xl shadow-md p-6">
+        <form id="form-rubro" class="flex gap-2 mb-8">
+          <input type="text" id="nuevo-rubro-nombre" required placeholder="Nuevo rubro..." class="flex-1 p-3 rounded-xl border bg-stone-50 outline-none">
+          <button type="submit" id="btn-add-rubro" class="bg-emerald-500 text-white font-bold px-6 rounded-xl">Crear</button>
+        </form>
+        <div id="lista-rubros" class="space-y-3"></div>
+      </div>
+    </div>
+  </div> <script>
     // ==========================================
+    // ⚠️ TU URL DE APPS SCRIPT (Asegurate de que esté bien)
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfXMCwzH-T2xlnsTs40WecQhbBKGIwiLJGDZrY6MY5RDapDUsEbk5jbyWXvEB__N7T1Q/exec"; 
     // ==========================================
 
-    let productos = [], rubros = [];
-    let estadoImagenes = {}; // Guarda qué URLs sobreviven al editar
+    // --- SISTEMA DE LOGIN ---
+    function verificarLogin() {
+      const pass = document.getElementById('input-pass').value;
+      const errorMsg = document.getElementById('error-login');
+      
+      // Acá cambias la contraseña si querés otra
+      if(pass === 'lolita2026') {
+        document.getElementById('pantalla-login').classList.add('hidden');
+        document.getElementById('contenido-admin').classList.remove('hidden');
+        iniciarApp(); // Solo carga los datos pesados si pone bien la clave
+      } else {
+        errorMsg.classList.remove('hidden');
+        setTimeout(() => errorMsg.classList.add('hidden'), 3000); // Oculta el error tras 3 seg
+      }
+    }
 
-    window.onload = () => {
+    // Permite apretar "Enter" en el teclado para entrar
+    document.getElementById('input-pass').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') verificarLogin();
+    });
+
+    // --- LÓGICA DE LA APP ---
+    let productos = [], rubros = [];
+    let estadoImagenes = {}; 
+
+    // Esta función ahora solo se llama si el login es correcto
+    function iniciarApp() {
       fetch(APPS_SCRIPT_URL).then(res => res.json()).then(data => {
-        productos = data.productos; rubros = data.rubros;
-        poblarRubros(); renderizarListaProductos(); renderizarListaRubros();
-      });
-    };
+        productos = data.productos || []; 
+        rubros = data.rubros || [];
+        poblarRubros(); 
+        renderizarListaProductos(); 
+        renderizarListaRubros();
+      }).catch(e => alert("Error conectando con la base de datos"));
+    }
 
     function cambiarTab(tab) {
       ['nuevo', 'editar', 'rubros'].forEach(t => {
@@ -81,7 +125,6 @@
       rubros.forEach(r => s.innerHTML += `<option value="${r}">${r}</option>`);
     }
 
-    // Funciones para leer múltiples archivos
     async function extraerBase64(files) {
       return Promise.all(Array.from(files).map(file => new Promise((resolve) => {
         const reader = new FileReader();
@@ -110,7 +153,6 @@
       lista.innerHTML = productos.length ? '' : '<p class="text-center">No hay productos.</p>';
       
       productos.forEach((p, i) => {
-        // Cargar URLs existentes al estado
         estadoImagenes[i] = p.Imagenes ? p.Imagenes.split(',').filter(u => u) : [];
         const opts = rubros.map(r => `<option value="${r}" ${r===p.Rubro ? 'selected' : ''}>${r}</option>`).join('');
 
@@ -132,11 +174,10 @@
             </div>
 
             <div class="flex gap-2">
-              <button onclick="guardarProducto(${i}, '${p.Nombre.replace(/'/g, "\\'")}')" id="btn-edit-p-${i}" class="flex-1 bg-stone-800 text-white font-bold py-3 rounded-xl text-sm">Guardar</button>
-              <button onclick="eliminarFila('producto', '${p.Nombre.replace(/'/g, "\\'")}')" class="bg-red-50 text-red-600 p-3 rounded-xl border font-bold">X</button>
+              <button onclick="guardarProducto(${i}, '${p.Nombre.replace(/'/g, "\\'")}')" id="btn-edit-p-${i}" class="flex-1 bg-stone-800 text-white font-bold py-3 rounded-xl text-sm hover:bg-stone-900 transition active:scale-95">Guardar</button>
+              <button onclick="eliminarFila('producto', '${p.Nombre.replace(/'/g, "\\'")}')" class="bg-red-50 hover:bg-red-100 text-red-600 p-3 rounded-xl border transition active:scale-95 font-bold">X</button>
             </div>
           </div>`;
-          // Dibujar miniaturas iniciales
           setTimeout(() => renderizarMiniaturas(i), 0);
       });
     }
@@ -148,8 +189,8 @@
         l.innerHTML += `
           <div class="flex gap-2 bg-stone-50 p-2 rounded-2xl border">
             <input type="text" id="edit-r-${i}" value="${r}" class="flex-1 p-2 bg-transparent outline-none font-semibold">
-            <button onclick="guardarRubro(${i}, '${r.replace(/'/g, "\\'")}')" id="btn-edit-r-${i}" class="bg-amber-100 text-amber-700 px-4 rounded-xl font-bold">OK</button>
-            <button onclick="eliminarFila('rubro', '${r.replace(/'/g, "\\'")}')" class="bg-red-100 text-red-600 px-4 rounded-xl font-bold">X</button>
+            <button onclick="guardarRubro(${i}, '${r.replace(/'/g, "\\'")}')" id="btn-edit-r-${i}" class="bg-amber-100 hover:bg-amber-200 transition text-amber-700 px-4 rounded-xl font-bold active:scale-95">OK</button>
+            <button onclick="eliminarFila('rubro', '${r.replace(/'/g, "\\'")}')" class="bg-red-100 hover:bg-red-200 transition text-red-600 px-4 rounded-xl font-bold active:scale-95">X</button>
           </div>`;
       });
     }
@@ -172,8 +213,7 @@
         rubro: document.getElementById(`edit-rubro-${i}`).value,
         descuento: document.getElementById(`edit-desc-${i}`).value,
         descripcion: document.getElementById(`edit-descrip-${i}`).value,
-        urlsExistentes: estadoImagenes[i],
-        nuevasImagenes: nuevasImg
+        urlsExistentes: estadoImagenes[i], nuevasImagenes: nuevasImg
       }, btn);
     }
 
