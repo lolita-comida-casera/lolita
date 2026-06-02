@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lolita - Comida Casera</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fafaf9; }
+    h1, h2, .font-titulo { font-family: 'Outfit', sans-serif; }
+    
+    /* Filtro CSS para unificar el tono de las imágenes de comida */
+    .tono-uniforme {
+      filter: sepia(10%) contrast(105%) saturate(110%);
+    }
+
+    /* Ocultar barra de scroll en el menú de rubros */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Indicador sutil para el carrusel de fotos */
+    .carrusel-hint::after {
+      content: '›'; position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,0.85); width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-weight: 900; 
+      color: #d97706; box-shadow: 0 2px 4px rgba(0,0,0,0.1); pointer-events: none;
+    }
+
+    /* === ESTILOS PARA LA CABECERA CON FOTO === */
+    
+    .header-con-fondo {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      /* Carga tu imagen de portada en alta calidad usando el ID que me pasaste */
+      background-image: url('https://drive.google.com/thumbnail?id=1Yn7admdkBY54O5fSlAFEwiL1GcVYRIK4&sz=w1200');
+    }
+
+    /* "Tela Gris" semi-transparente para opacar la foto y que resalte el logo */
+    .header-overlay {
+      position: absolute;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.55); /* Negro al 55% de opacidad */
+      z-index: 0;
+      border-bottom-left-radius: 1.5rem; /* Para acompañar el redondeo de la cabecera */
+      border-bottom-right-radius: 1.5rem;
+    }
+  </style>
+</head>
+<body class="bg-stone-50 text-stone-800 min-h-screen pb-24">
+
+  <header class="text-center pt-10 pb-8 shadow-md relative z-10 header-con-fondo rounded-b-3xl overflow-hidden">
+    
+    <div class="header-overlay"></div>
+    
+    <div class="max-w-4xl mx-auto px-4 relative z-10"> <div class="relative h-28 w-28 mx-auto mb-5">
+        <img src="https://drive.google.com/thumbnail?id=1lUldysHYB-VVqA4M22KXt1V9EN41h7FX&sz=w400" alt="Logo Lolita" 
+             class="h-full w-full rounded-full object-cover shadow-xl border-4 border-white transition-transform hover:scale-105" 
+             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=L&background=fdfbf7&color=d97706'">
+      </div>
+      
+      <h1 class="text-4xl md:text-5xl font-900 text-white tracking-tight">Lolita</h1>
+      <p class="text-stone-200 text-sm md:text-base font-semibold mt-1 tracking-widest uppercase">Casero, fresco y rico</p>
+    </div>
+  </header>
+
+  <nav id="menu-rubros" class="flex justify-start md:justify-center gap-3 my-8 px-4 overflow-x-auto no-scrollbar max-w-5xl mx-auto">
+    <div class="animate-pulse flex gap-3">
+      <div class="h-10 w-24 bg-stone-200 rounded-full"></div>
+      <div class="h-10 w-32 bg-stone-200 rounded-full"></div>
+      <div class="h-10 w-28 bg-stone-200 rounded-full"></div>
+    </div>
+  </nav>
+
+  <main id="catalogo" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-4 max-w-6xl mx-auto">
+    <div class="col-span-full text-center py-12 text-stone-400 font-medium animate-pulse">Cargando el menú más rico...</div>
+  </main>
+
+  <button id="btn-carrito" onclick="toggleCarrito()" class="fixed bottom-6 right-6 md:bottom-8 md:right-8 bg-stone-900 text-white p-4 rounded-full shadow-2xl hover:bg-black hover:scale-105 active:scale-95 transition-all flex items-center gap-2 z-40 hidden">
+    <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+    <span id="contador-carrito" class="font-black bg-amber-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs absolute -top-1 -right-1 shadow-sm border-2 border-stone-900">0</span>
+  </button>
+
+  <div id="panel-carrito-backdrop" class="fixed inset-0 bg-stone-900/60 z-50 hidden backdrop-blur-sm transition-opacity opacity-0" onclick="toggleCarrito()"></div>
+  <div id="panel-carrito" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col rounded-l-3xl">
+    
+    <div class="p-5 border-b border-stone-100 flex justify-between items-center bg-white rounded-tl-3xl">
+      <div class="flex items-center gap-2">
+        <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        <h2 class="text-2xl font-900 font-titulo text-stone-800">Tu Pedido</h2>
+      </div>
+      <button onclick="toggleCarrito()" class="text-stone-400 hover:text-stone-800 bg-stone-100 hover:bg-stone-200 rounded-full p-2 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    
+    <div id="lista-carrito" class="flex-1 overflow-y-auto p-5 space-y-4 bg-stone-50/50">
+      </div>
+    
+    <div class="p-5 border-t border-stone-100 bg-white">
+      <div class="flex justify-between items-end mb-5">
+        <span class="font-bold text-stone-500 uppercase text-sm tracking-wider">Total estimado</span>
+        <span id="total-carrito" class="text-3xl font-900 text-stone-900 font-titulo">$0</span>
+      </div>
+      <button onclick="enviarPedidoWpp()" class="w-full bg-[#25D366] hover:bg-[#1ebd5a] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition shadow-lg shadow-green-500/30 active:scale-95 text-lg">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.4.011 11.948.011c3.172.001 6.154 1.234 8.399 3.473 2.243 2.24 3.476 5.218 3.475 8.393-.004 6.599-5.342 11.938-11.892 11.938-2.002-.002-3.967-.504-5.714-1.46L0 24zm6.59-4.846c1.657.982 3.493 1.5 5.353 1.501 5.396 0 9.782-4.381 9.785-9.773.002-2.612-1.011-5.068-2.854-6.915C17.042 2.116 14.59 1.1 11.95 1.1c-5.399 0-9.788 4.383-9.79 9.775-.001 1.872.489 3.702 1.42 5.32l-.995 3.633 3.722-.975zm11.367-7.38c-.347-.174-2.055-1.013-2.373-1.129-.318-.116-.549-.174-.78.174-.23.348-.895 1.129-1.096 1.361-.202.233-.404.261-.751.087-.347-.173-1.464-.54-2.79-1.722-1.03-.919-1.725-2.054-1.927-2.4-.202-.347-.022-.535.152-.708.156-.155.347-.406.52-.609.174-.203.23-.348.347-.58.117-.232.058-.435-.029-.608-.086-.174-.78-1.88-.1069-2.576-.283-.68-.51-.589-.7-.589l-.549-.007c-.193 0-.505.073-.77.362-.266.289-1.013.992-1.013 2.42 0 1.43 1.042 2.812 1.187 3.002.145.19 2.054 3.134 4.973 4.394.695.301 1.237.481 1.662.616.698.222 1.334.191 1.837.116.56-.083 2.055-.84 2.344-1.652.289-.812.289-1.507.202-1.652-.087-.145-.318-.232-.665-.406z"/></svg>
+        Pedir por WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // =====================================================================
+    // URL DEL SCRIPT YA INTEGRADA
+    // =====================================================================
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyfXMCwzH-T2xlnsTs40WecQhbBKGIwiLJGDZrY6MY5RDapDUsEbk5jbyWXvEB__N7T1Q/exec'; 
+    const WPP_NUMERO = '59899481492';
+    // =====================================================================
+    
+    let todosLosProductos = [];
+    let carrito = {};
+
+    window.onload = () => {
+      fetch(APPS_SCRIPT_URL)
+        .then(r => r.json())
+        .then(data => {
+          todosLosProductos = data.productos || [];
+          generarMenuRubros(data.rubros || []);
+          renderizarProductos(todosLosProductos);
+        })
+        .catch(e => {
+          document.getElementById('catalogo').innerHTML = '<div class="col-span-full text-center text-red-500 bg-red-50 p-4 rounded-xl font-bold">Error de conexión con el menú. Intentá recargar.</div>';
+          console.error("Error cargando datos:", e);
+        });
+    };
+
+    function generarMenuRubros(rubros) {
+      const nav = document.getElementById('menu-rubros');
+      nav.innerHTML = `<button onclick="filtrarProductos('Todos', this)" class="rubro-btn bg-stone-800 text-white shadow-md px-6 py-2.5 rounded-full text-sm font-bold transition-all hover:scale-105 active:scale-95">Todos</button>`;
+      
+      rubros.forEach(rubro => {
+        nav.innerHTML += `<button onclick="filtrarProductos('${rubro}', this)" class="rubro-btn bg-white text-stone-500 hover:text-stone-800 hover:bg-stone-100 border border-stone-200 px-6 py-2.5 rounded-full text-sm font-bold transition-all hover:scale-105 active:scale-95">${rubro}</button>`;
+      });
+    }
+
+    function filtrarProductos(rubro, btnElement) {
+      document.querySelectorAll('.rubro-btn').forEach(b => { 
+        b.className = "rubro-btn bg-white text-stone-500 hover:text-stone-800 hover:bg-stone-100 border border-stone-200 px-6 py-2.5 rounded-full text-sm font-bold transition-all hover:scale-105 active:scale-95"; 
+      });
+      btnElement.className = "rubro-btn bg-stone-800 text-white shadow-md px-6 py-2.5 rounded-full text-sm font-bold transition-all hover:scale-105 active:scale-95";
+      
+      renderizarProductos(rubro === 'Todos' ? todosLosProductos : todosLosProductos.filter(p => p.Rubro === rubro));
+    }
+
+    function renderizarProductos(productos) {
+      const contenedor = document.getElementById('catalogo');
+      contenedor.innerHTML = productos.length ? '' : '<div class="col-span-full text-center text-stone-400 py-12 font-medium">No hay productos en esta categoría.</div>';
+
+      productos.forEach(p => {
+        const nombreLimpio = p.Nombre.replace(/'/g, "\\'");
+        
+        // --- LOGICA DE CARRUSEL ---
+        const arrayUrls = p.Imagenes ? p.Imagenes.split(',').filter(u=>u) : ['https://placehold.co/400x400/e7e5e4/a8a29e?text=Sin+Foto'];
+        const esCarrusel = arrayUrls.length > 1;
+        
+        const htmlImagenes = arrayUrls.map(url => `
+          <div class="shrink-0 w-full h-full snap-center relative">
+            <img src="${url}" class="w-full h-full object-cover tono-uniforme" onerror="this.onerror=null; this.src='https://placehold.co/400x400/e7e5e4/a8a29e?text=Sin+Foto'">
+          </div>`).join('');
+          
+        const claseContenedorFotos = esCarrusel ? "flex overflow-x-auto snap-x snap-mandatory no-scrollbar w-full h-full carrusel-hint" : "w-full h-full relative";
+
+        // --- PRECIOS Y OFERTAS ---
+        const desc = parseFloat(p.Descuento) || 0, orig = parseFloat(p.Precio);
+        let final = orig, badge = '', borde = 'border-stone-100', bgPrecio = 'text-stone-900';
+        let htmlPrecio = `<p class="font-900 text-stone-900 text-xl font-titulo">$${orig}</p>`;
+        
+        if (desc > 0) {
+          final = Math.round(orig - (orig * desc / 100)); 
+          borde = 'border-red-200 shadow-md ring-1 ring-red-400/50';
+          badge = `<span class="absolute top-3 right-3 text-[11px] font-black text-white bg-red-500 px-2.5 py-1.5 rounded-lg z-10 shadow-sm flex items-center gap-1 animate-pulse"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>${desc}% OFF</span>`;
+          htmlPrecio = `<div class="flex items-baseline gap-2"><p class="font-900 text-red-500 text-xl font-titulo">$${final}</p><p class="text-stone-400 text-sm line-through font-semibold">$${orig}</p></div>`;
+        }
+
+        contenedor.innerHTML += `
+          <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border ${borde} flex flex-col justify-between group relative">
+            ${badge}
+            <div>
+              <div class="w-full aspect-square bg-stone-100 overflow-hidden relative">
+                <span class="absolute top-3 left-3 text-[10px] font-black uppercase tracking-widest text-stone-800 bg-white/95 backdrop-blur px-3 py-1.5 rounded-xl z-10 shadow-sm">${p.Rubro}</span>
+                <div class="${claseContenedorFotos}">${htmlImagenes}</div>
+              </div>
+              <div class="p-4 pb-3">
+                <h3 class="font-800 text-lg leading-tight text-stone-800">${p.Nombre}</h3>
+                ${p.Descripción ? `<p class="text-xs text-stone-500 mt-1.5 line-clamp-2 font-medium">${p.Descripción}</p>` : ''}
+                <div class="mt-2.5">${htmlPrecio}</div>
+              </div>
+            </div>
+            
+            <div class="p-4 pt-0 flex gap-2">
+              <button onclick="comprarDirecto('${nombreLimpio}')" class="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-800 py-3 rounded-2xl text-xs font-bold transition-colors active:scale-95">Directo al Wpp</button>
+              <button onclick="agregarAlCarrito('${nombreLimpio}', ${final})" class="bg-amber-500 hover:bg-amber-400 text-white p-3 px-4 rounded-2xl font-black transition-all shadow-md shadow-amber-500/20 active:scale-95 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+              </button>
+            </div>
+          </div>`;
+      });
+    }
+
+    // --- LÓGICA DEL CARRITO ---
+    function comprarDirecto(n) { 
+      window.open(`https://wa.me/${WPP_NUMERO}?text=${encodeURIComponent('¡Hola Lolita! Quiero consultar directamente por: ' + n)}`, '_blank'); 
+    }
+    
+    function agregarAlCarrito(n, p) { 
+      carrito[n] ? carrito[n].cantidad++ : carrito[n] = { precio: parseFloat(p), cantidad: 1 }; 
+      actualizarUI(); 
+      
+      const btn = document.getElementById('btn-carrito');
+      btn.classList.add('scale-125');
+      setTimeout(() => btn.classList.remove('scale-125'), 200);
+    }
+    
+    function restarDelCarrito(n) { 
+      carrito[n].cantidad > 1 ? carrito[n].cantidad-- : delete carrito[n]; 
+      actualizarUI(); 
+    }
+    
+    function toggleCarrito() {
+      const panel = document.getElementById('panel-carrito');
+      const backdrop = document.getElementById('panel-carrito-backdrop');
+      
+      if (panel.classList.contains('translate-x-full')) {
+        if(Object.keys(carrito).length === 0) return; // No abrir si está vacío
+        backdrop.classList.remove('hidden');
+        setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
+        panel.classList.remove('translate-x-full');
+      } else {
+        backdrop.classList.add('opacity-0');
+        panel.classList.add('translate-x-full');
+        setTimeout(() => backdrop.classList.add('hidden'), 300);
+      }
+    }
+    
+    function actualizarUI() {
+      const lista = document.getElementById('lista-carrito'); 
+      let t = 0, items = 0; 
+      lista.innerHTML = '';
+      
+      for (const [n, d] of Object.entries(carrito)) {
+        t += d.precio * d.cantidad; items += d.cantidad;
+        lista.innerHTML += `
+          <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-stone-100">
+            <div class="flex-1 pr-3">
+              <p class="font-800 text-stone-800 text-sm leading-tight">${n}</p>
+              <p class="text-stone-400 text-xs font-semibold mt-0.5">$${d.precio} c/u</p>
+            </div>
+            <div class="flex items-center gap-3 bg-stone-50 p-1 rounded-xl border border-stone-100">
+              <button onclick="restarDelCarrito('${n.replace(/'/g, "\\'")}')" class="w-8 h-8 flex items-center justify-center font-black text-stone-500 hover:bg-white hover:shadow-sm rounded-lg transition active:scale-95">-</button>
+              <span class="w-4 text-center text-sm font-900 text-stone-800">${d.cantidad}</span>
+              <button onclick="agregarAlCarrito('${n.replace(/'/g, "\\'")}', ${d.precio})" class="w-8 h-8 flex items-center justify-center font-black text-stone-500 hover:bg-white hover:shadow-sm rounded-lg transition active:scale-95">+</button>
+            </div>
+          </div>`;
+      }
+      
+      document.getElementById('contador-carrito').innerText = items;
+      document.getElementById('total-carrito').innerText = `$${t}`;
+      
+      const btnFlotante = document.getElementById('btn-carrito');
+      if (items > 0) {
+        btnFlotante.classList.remove('hidden');
+      } else {
+        btnFlotante.classList.add('hidden');
+        if (!document.getElementById('panel-carrito').classList.contains('translate-x-full')) {
+          toggleCarrito();
+        }
+      }
+    }
+
+    function enviarPedidoWpp() {
+      if (Object.keys(carrito).length === 0) return;
+      let txt = '¡Hola Lolita! Te paso mi pedido desde la web:%0A%0A', t = 0;
+      
+      for (const [n, d] of Object.entries(carrito)) { 
+        t += d.precio * d.cantidad; 
+        txt += `▪ ${d.cantidad}x ${n} ($${d.precio * d.cantidad})%0A`; 
+      }
+      
+      txt += `%0A*Total estimado: $${t}*`;
+      window.open(`https://wa.me/${WPP_NUMERO}?text=${txt}`, '_blank');
+    }
+  </script>
+</body>
+</html>
